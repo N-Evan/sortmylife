@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"
+		/>
+		<meta name="theme-color" content="#232323" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<link rel="manifest" href="%sveltekit.assets%/manifest.json" />
+		<link rel="icon" href="%sveltekit.assets%/icon.svg" />
+		<!-- No <title> here on purpose: a static one renders before %sveltekit.head% and wins,
+		     which is what made every tab show the bare host. Pages set their own. -->
+		%sveltekit.head%
+	</head>
+	<body data-sveltekit-preload-data="tap">
+		<div id="app">%sveltekit.body%</div>
+	</body>
+</html>

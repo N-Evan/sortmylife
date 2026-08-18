@@ -1,0 +1,137 @@
+# Checkpoints
+
+Newest last. One line each: date — what changed — where. Read this instead of the codebase.
+
+- 2026-08-14 — **v0.1 shipped.** SvelteKit + `node:sqlite`. Three screens (bridge / lists / list), XP+levels,
+  streaks with daily quota, cross-off animation + 5s undo, code-drawn pixel sprites, PWA manifest.
+  Verified: build passes, all routes 200, API ops + validation + streak banking + undo tested by hand.
+- 2026-08-14 — Design decisions worth not re-litigating: no ORM (Node 24 ships `node:sqlite`), no auth
+  (Tailscale), no tests yet (user tests manually), mutations go through one `POST /api` op table.
+
+- 2026-08-14 — **P1 shipped** (schema v2). Quick capture → Inbox, life areas, effort estimates
+  (5/15/30/60/120m), waiting-on blocking, avoidance clock (`touched_at`, 7+ days), "what should I do
+  next?" scoring, focus mode with pause/bank timer, bridge rebuilt into TODAY/CURRENTLY/UPCOMING/
+  WAITING/INBOX/AVOIDING. Nav went to 4 slots. Verified: v1→v2 migration on the live DB kept all data;
+  ranking, blocking, avoidance and timer math checked by hand.
+- 2026-08-14 — Roadmap agreed: **P2** focus polish + Ctrl+K command bar · **P3** projects →
+  milestones → tasks, recurring tasks · **P4** calendar (self-contained, no external sync) ·
+  **P5** habits + reminders **via Telegram bot** · **P6** weekly reset.
+
+- 2026-08-14 — **P5 shipped** (schema v3). Habits/routines (morning/day/evening slots, weekday masks,
+  per-habit streaks, optional targets+units, 7-day heatmap), Telegram reminders (`at` and
+  `unless-done` kinds) driven by a 30s scheduler tick, inbound Telegram → Inbox capture, context tags
+  (`@home`/`@computer`/`@phone`/`@errand`/`@outside`) with a Bridge filter. Nav went to 5 slots.
+  Verified: live DB migrated v2→v3 intact; habit XP awards once and refunds on unlog; streak math
+  correct across gaps, grace-day and weekday masks; `unless` reminders self-settle when the habit is
+  already logged; invalid contexts/times coerce instead of erroring; scheduler runs without a token
+  and doesn't crash the server.
+
+- 2026-08-14 — **Multi-user + P4 shipped** (schema v5). Auth had to land first: it re-scopes every
+  table, so building the calendar single-user would have meant rewriting it. Users/sessions/admin
+  (scrypt via `node:crypto`, DB sessions, per-username login throttle), first-run `/setup` claim,
+  signup/login pages, admin panel (create / delete / disable / reset password / clear data).
+  Calendar: day+week grid, overlap packing, task deadlines on the grid, and **available time** —
+  free gaps in the 08:00–22:00 window matched against tasks whose effort estimate fits.
+  Nav restructured to 5 slots + a MORE sheet, so P2/P3/P6 have somewhere to go.
+  Verified: live DB migrated v3→v5, all data owned by user 1, zero orphans; cross-user isolation
+  (B cannot read, complete or delete A's task, and gets 404 on A's list); identical login error for
+  unknown user vs wrong password; throttle at 8 failures, per-username; admin cannot delete or
+  disable itself; disabled and deleted accounts cannot log in; event validation rejects reversed,
+  absurd and non-numeric spans; overlap packing and gap math checked by hand.
+
+- 2026-08-14 — **Telegram reworked + page titles** (schema v6). One bot per server: the token moved
+  to the reserved `settings.user_id = 0` scope and is admin-only; `tg_chat` stays per user and is the
+  only Telegram setting a normal user owns. Admin can also set any user's chat ID from `/admin`.
+  Dropped "first chat to message claims the bot" — with multiple users that let the first person to
+  message steal the account. The bot now **replies with your chat ID** and you paste it in. Added
+  `CHECK BOT` (getMe + getWebhookInfo + pending count) and `DELETE WEBHOOK`. Every route now sets a
+  `<title>`; the static one in `app.html` was removed — it rendered before `%sveltekit.head%` and
+  won, which is why every tab showed the bare host.
+  Verified: live DB migrated v5→v6 with the token relocated to scope 0 and data intact; non-admins
+  get 403 on token/diagnose/other-user-chat; chat IDs validated (numeric, negatives for groups) and
+  refused when already claimed; token never reaches the client; diagnose returns Telegram's real
+  error for a bad token; every page emits exactly one correct title.
+
+- 2026-08-14 — **UI pass: scrollbars, toast, overflow, month view.** No schema change.
+  Clockwork scrollbars (toothed track, notched sage thumb) via `::-webkit-scrollbar` plus
+  `scrollbar-width/color` for Firefox. Completion toast is a bottom bar on mobile but a
+  bottom-right card ≥720px, so it no longer blankets the panel underneath. **Root cause of the
+  overflow was `.label { white-space: nowrap }` in `app.css`** — every long label pushed its
+  container sideways instead of wrapping; removed and replaced with an opt-in `.nowrap`. Added
+  `overflow-wrap: anywhere` on body, `min-width: 0` on direct children of `.row`/`.stack`/`.panel`,
+  wrapping `.btn`, and a shared `.field.two` that collapses to one column under 520px.
+  Calendar gained a **month view** (6×7 grid, adjacent months dimmed, event chips + deadline flags,
+  click a day to drop into it), driven by `?v=day|week|month` in the URL so reloads keep it.
+  Verified: all three views 200 and render their own markup, month grid is exactly 42 cells with
+  events and deadline flags, prev/next month headings correct, unknown `?v=` falls back to day;
+  every CSS rule confirmed present in the built stylesheet with no component-level overrides left.
+
+## Layout rules that keep biting
+
+- Never put `white-space: nowrap` on a shared class. Use `.nowrap` on the one element that needs it.
+- Flex and grid children default to `min-width: auto` and refuse to shrink below their content —
+  that is what bursts a panel. `.row > *`, `.stack > *` and `.panel > *` are already covered;
+  new containers need the same.
+- `.truncate` only works if its parent can shrink.
+- Two-column form rows: use `class="field two"` and let `app.css` handle the collapse.
+
+## Telegram model (v6)
+
+| Setting | Scope | Who can change it |
+|---|---|---|
+| `tg_token` | `user_id = 0` (server-wide) | admin only, or `SML_TG_TOKEN` env |
+| `tg_offset` | `user_id = 0` | internal — the getUpdates cursor |
+| `tg_chat` | per user | the user, or an admin on their behalf |
+
+`poll()` is a single global loop. Each inbound message is routed by chat ID to whichever account
+claimed it; an unclaimed chat is told its own ID instead of being bound to anyone. A chat ID can
+only belong to one account at a time.
+
+## Auth notes
+
+**Your existing data is now owned by user 1, `admin`, with no password.** The first page load
+redirects to `/setup` to claim it — do that before anything else can reach the server.
+
+Session cookie `sml_session`, httpOnly, sameSite=lax, `secure` only when served over HTTPS (so it
+still works over plain-http Tailscale). 30-day expiry. Changing a password kills every session.
+Signup is **open** to anyone who can reach the server — the tailnet is the perimeter. Admin accounts
+cannot be deleted or disabled through the admin panel, deliberately: it removes the way to lock
+yourself out. To demote an admin, edit the DB.
+
+## Scoring rules (P1)
+
+`scoreTask` in `game.js`: overdue +100, due ≤24h +60, due ≤72h +30; priority ×10; effort ≤15m +15,
+≤30m +8; untouched 7+ days +20. Anything with `waiting_on` set is excluded entirely. Ties break on
+smaller effort. `touched_at` updates on create, edit and focus-start — not on merely viewing.
+
+## Reminders (P5)
+
+Scheduler ticks every 30s from `hooks.server.js`. A reminder fires when: enabled, today's weekday bit
+is set, `at_time <= now`, and `last_sent_day != today`. `at_time <= now` is deliberate — a reminder
+whose moment passed while the PC was off still fires once on the next tick rather than vanishing.
+`unless` reminders go quiet (and mark themselves sent) when their task/habit is already done.
+
+Telegram credentials live in the `settings` table so they can be pasted in the UI; `SML_TG_TOKEN` /
+`SML_TG_CHAT` env vars override them if set. The token is never sent to the client.
+
+## Not built yet (deliberately)
+
+- **Location-based reminders are not possible** in a web app — no background GPS. Context tags are
+  the shipped substitute.
+- Reminder time is local-server time with a 30s granularity. No timezone handling — single user,
+  single machine.
+- Habit targets are informational: logging records the number but nothing enforces hitting it.
+- One context per task, not many. Add a join table only if that genuinely bites.
+- **Calendar has no external sync** — self-contained by choice. No ICS, no Google, no OAuth.
+- No recurring events (recurring *tasks* are P3). No timezone handling; server-local throughout.
+- Working window for "available time" is a constant 08:00–22:00 in `calendar.js`. Make it a
+  per-user setting when it actually annoys you.
+- Login throttle is in-memory, so a restart clears it. Fine on a tailnet; move to the DB if this
+  is ever exposed publicly.
+- No password reset by email — the admin resets passwords. There is no email in this system at all.
+- Combo/cascade multiplier and achievements — user didn't pick them; the CASCADE slot became STREAK.
+- Skipped suggestions ("something else") are client-side only and reset on reload. Deliberate.
+- Undo on a completed task refunds XP but leaves a banked streak alone.
+- The old seed lists `Today` and `Life` still exist alongside the new areas — rename or delete in-app.
+- PNG icons — manifest is SVG-only. Add if Android refuses the install prompt.
+- Streak shields / grace days. Miss a day and it resets to 0.
