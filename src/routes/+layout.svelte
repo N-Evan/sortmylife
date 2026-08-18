@@ -72,7 +72,7 @@
 				<Sprite name="book" color="currentColor" size="18" /> Life areas
 			</a>
 			<a class="item" href="/settings" onclick={() => (more = false)}>
-				<Sprite name="gear" color="currentColor" size="18" /> Reminders &amp; Telegram
+				<Sprite name="gear" color="currentColor" size="18" /> Settings
 			</a>
 			{#if data.user.is_admin}
 				<a class="item" href="/admin" onclick={() => (more = false)}>
@@ -176,7 +176,7 @@
 	.more[aria-current='page'] {
 		color: var(--sage);
 		border-top-color: var(--sage);
-		background: rgba(168, 191, 175, 0.06);
+		background: color-mix(in srgb, var(--sage) 6%, transparent);
 	}
 	.plus {
 		display: grid;
@@ -223,7 +223,7 @@
 		position: fixed;
 		inset: 0;
 		z-index: 44;
-		background: rgba(12, 12, 12, 0.72);
+		background: color-mix(in srgb, var(--ink) 72%, transparent);
 	}
 	.sheet {
 		position: fixed;
@@ -262,7 +262,7 @@
 		width: 100%;
 	}
 	.item:hover {
-		background: rgba(237, 235, 230, 0.05);
+		background: color-mix(in srgb, var(--bone) 5%, transparent);
 	}
 	.item.live {
 		color: var(--sage);
@@ -281,7 +281,7 @@
 		place-content: center;
 		justify-items: center;
 		gap: 8px;
-		background: rgba(20, 20, 20, 0.86);
+		background: color-mix(in srgb, var(--ink) 86%, transparent);
 		pointer-events: none;
 		animation: fade 2.6s ease-out forwards;
 	}

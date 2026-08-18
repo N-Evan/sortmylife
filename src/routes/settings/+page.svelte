@@ -1,5 +1,6 @@
 <script>
 	import { call } from '$lib/api.js';
+	import { THEMES, currentTheme, setTheme } from '$lib/theme.js';
 	import { goto } from '$app/navigation';
 	import { ALL_DAYS, WEEKDAY_LABELS, daysLabel, CONTEXTS, shortName } from '$lib/game.js';
 
@@ -128,6 +129,9 @@
 			enabled: !r.enabled
 		});
 
+	let theme = $state('clockwork');
+	$effect(() => (theme = currentTheme()));
+
 	const describe = (r) =>
 		r.kind === 'unless'
 			? `IF ${r.task_title ?? r.habit_name ?? '?'} NOT DONE BY ${r.at_time}`
@@ -135,6 +139,29 @@
 </script>
 
 <svelte:head><title>Settings — SortMyLife</title></svelte:head>
+
+<div class="rule"><span class="label">Appearance</span></div>
+
+<section class="panel">
+	<p class="label dim hint">Per device. Takes effect immediately.</p>
+	<div class="themes">
+		{#each THEMES as t (t.id)}
+			<button
+				class="swatch" data-theme={t.id} class:on={theme === t.id}
+				onclick={() => { theme = t.id; setTheme(t.id); }}
+			>
+				<span class="chips" aria-hidden="true">
+					<i style="background: var(--sage)"></i>
+					<i style="background: var(--amber)"></i>
+					<i style="background: var(--rust)"></i>
+					<i style="background: var(--bone)"></i>
+				</span>
+				<span class="tname">{t.name}</span>
+				<span class="label dim tnote">{t.note}</span>
+			</button>
+		{/each}
+	</div>
+</section>
 
 <div class="rule"><span class="label">Account</span></div>
 
@@ -363,6 +390,30 @@
 </section>
 
 <style>
+	.themes {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+		gap: 8px;
+		margin-top: 10px;
+	}
+	.swatch {
+		display: grid;
+		gap: 4px;
+		padding: 9px 10px;
+		text-align: left;
+		cursor: pointer;
+		background: var(--panel);
+		border: 1px solid var(--line);
+		color: var(--bone);
+	}
+	.swatch.on {
+		border-color: var(--sage);
+		box-shadow: inset 0 0 0 1px var(--sage);
+	}
+	.swatch .chips { display: flex; gap: 3px; }
+	.swatch i { width: 100%; height: 10px; border: 1px solid var(--line); }
+	.tname { font-size: 12px; letter-spacing: 0.08em; }
+	.tnote { text-transform: none; letter-spacing: 0.04em; }
 	.wrap {
 		flex-wrap: wrap;
 	}
@@ -426,13 +477,13 @@
 	.btn.on {
 		border-color: var(--sage);
 		color: var(--sage);
-		background: rgba(168, 191, 175, 0.14);
+		background: color-mix(in srgb, var(--sage) 14%, transparent);
 	}
 	.diag {
 		margin: 8px 0;
 		padding: 8px 10px;
 		border-left: 2px solid currentColor;
-		background: rgba(237, 235, 230, 0.05);
+		background: color-mix(in srgb, var(--bone) 5%, transparent);
 		text-transform: none;
 		letter-spacing: 0.04em;
 		line-height: 1.5;

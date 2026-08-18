@@ -111,7 +111,7 @@
 		gap: 10px;
 		padding: 9px 12px 9px 8px;
 		border: 1px solid var(--line);
-		background: rgba(30, 30, 30, 0.6);
+		background: color-mix(in srgb, var(--panel) 60%, transparent);
 		transition: opacity 0.35s, background 0.2s;
 	}
 	.task.overdue {
@@ -242,6 +242,6 @@
 		}
 	}
 	.clearing {
-		background: rgba(168, 191, 175, 0.09);
+		background: color-mix(in srgb, var(--sage) 9%, transparent);
 	}
 </style>

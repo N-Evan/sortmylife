@@ -17,6 +17,11 @@
 	let editing = $state(null);
 	let skipped = $state(new Set());
 	let showAll = $state(false);
+	// The instrument deck (record / countdown / orbit / status) is glanceable but noisy.
+	// Collapsed by default: the one line left behind carries the headline and the numbers.
+	let deck = $state(false);
+	$effect(() => (deck = localStorage.getItem('sml.deck') === '1'));
+	const toggleDeck = (e) => localStorage.setItem('sml.deck', e.currentTarget.open ? '1' : '0');
 	let ctx = $state('');
 
 	$effect(() => {
@@ -128,6 +133,15 @@
 
 <Capture />
 
+<details class="deck" bind:open={deck} ontoggle={toggleDeck}>
+	<summary class="panel deckline">
+		<span class="hl label" class:rust={headline.hot}>{headline.text}</span>
+		<span class="label dim nums">
+			LVL {String(p.level).padStart(2, '0')} // x{streak} // {data.doneToday}/{quota} // {clock.text}{clock.unit === 'OVERDUE' ? ' LATE' : ''}
+		</span>
+		<span class="label dim caret">{deck ? '▲' : '▼'}</span>
+	</summary>
+
 <div class="hudtop">
 	<section class="panel record">
 		<div class="label">Field record // lvl {String(p.level).padStart(2, '0')}</div>
@@ -211,6 +225,7 @@
 		{/each}
 	</div>
 </section>
+</details>
 
 <!-- CURRENTLY -->
 {#if focusing}
@@ -287,21 +302,6 @@
 		</div>
 	{/if}
 
-	<a class="panel strip" href={inboxList ? `/lists/${inboxList.id}` : '/lists'} class:mute={!inbox.length}>
-		<span class="label">Inbox</span>
-		<span class="n" class:amber={inbox.length}>{inbox.length}</span>
-		<span class="label dim">{inbox.length ? 'THINGS TO PROCESS' : 'CLEAR'}</span>
-	</a>
-
-	<div class="panel strip" class:mute={!avoided.length}>
-		<span class="label">Avoiding</span>
-		<span class="n" class:rust={avoided.length}>{avoided.length}</span>
-		<span class="label dim">{STALE_DAYS}+ DAYS UNTOUCHED</span>
-		{#each avoided.slice(0, 2) as t (t.id)}
-			<button class="label alsoitem truncate" onclick={() => (editing = t)}>{t.title}</button>
-		{/each}
-	</div>
-
 	<a class="panel strip wide" href="/calendar" class:mute={!todayEvents.length}>
 		<span class="row">
 			<span class="label grow">Schedule // {todayEvents.length} today</span>
@@ -321,8 +321,33 @@
 			<span class="label dim">NOTHING SCHEDULED</span>
 		{/if}
 	</a>
+</div>
 
-	<div class="panel strip wide" class:mute={!upcoming.length}>
+<!-- TRAYS: everything that is a count first and a list second -->
+<details class="trays">
+	<summary class="panel trayline">
+		<span class="label grow">
+			Trays // inbox {inbox.length} // avoiding {avoided.length} // upcoming {upcoming.length} // waiting {waiting.length}
+		</span>
+		<span class="label dim">▼</span>
+	</summary>
+	<div class="strips">
+		<a class="panel strip" href={inboxList ? `/lists/${inboxList.id}` : '/lists'} class:mute={!inbox.length}>
+		<span class="label">Inbox</span>
+		<span class="n" class:amber={inbox.length}>{inbox.length}</span>
+		<span class="label dim">{inbox.length ? 'THINGS TO PROCESS' : 'CLEAR'}</span>
+	</a>
+
+		<div class="panel strip" class:mute={!avoided.length}>
+		<span class="label">Avoiding</span>
+		<span class="n" class:rust={avoided.length}>{avoided.length}</span>
+		<span class="label dim">{STALE_DAYS}+ DAYS UNTOUCHED</span>
+		{#each avoided.slice(0, 2) as t (t.id)}
+			<button class="label alsoitem truncate" onclick={() => (editing = t)}>{t.title}</button>
+		{/each}
+	</div>
+
+		<div class="panel strip wide" class:mute={!upcoming.length}>
 		<span class="label">Upcoming</span>
 		{#if upcoming.length}
 			{#each upcoming as t (t.id)}
@@ -338,7 +363,7 @@
 		{/if}
 	</div>
 
-	<div class="panel strip wide" class:mute={!waiting.length}>
+		<div class="panel strip wide" class:mute={!waiting.length}>
 		<span class="label">Waiting on</span>
 		{#if waiting.length}
 			{#each waiting.slice(0, 4) as t (t.id)}
@@ -351,7 +376,8 @@
 			<span class="label dim">NOT BLOCKED ON ANYONE</span>
 		{/if}
 	</div>
-</div>
+	</div>
+</details>
 
 <div class="rule">
 	<button class="label toggle" onclick={() => (showAll = !showAll)}>
@@ -486,7 +512,7 @@
 	.ctxchip.on {
 		border-color: var(--sage);
 		color: var(--sage);
-		background: rgba(168, 191, 175, 0.14);
+		background: color-mix(in srgb, var(--sage) 14%, transparent);
 	}
 	.ctxchip.clear {
 		border-style: dashed;
@@ -522,6 +548,24 @@
 	}
 	.alsoitem::before { content: '→ '; color: var(--dim); }
 	.none { margin: 8px 0; color: var(--dim); font-size: 13px; }
+
+	.deck { margin-bottom: 8px; }
+	summary {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		cursor: pointer;
+		list-style: none;
+		padding: 9px 12px;
+	}
+	summary::-webkit-details-marker { display: none; }
+	.hl { flex: 1; min-width: 0; font-size: 11px; color: var(--bone); }
+	.nums { text-align: right; }
+	@media (max-width: 560px) { .nums { display: none; } }
+	.caret { flex: none; }
+	.trays { margin-top: 8px; }
+	.trays[open] .trayline { margin-bottom: 8px; }
+	.trays .strips { margin-top: 0; }
 
 	.strips {
 		display: grid;

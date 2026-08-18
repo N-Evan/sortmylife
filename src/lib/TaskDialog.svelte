@@ -174,7 +174,7 @@
 		}
 	}
 	dialog::backdrop {
-		background: rgba(12, 12, 12, 0.78);
+		background: color-mix(in srgb, var(--ink) 78%, transparent);
 	}
 	.prio {
 		display: grid;
@@ -203,7 +203,7 @@
 	.effort .btn.on {
 		border-color: var(--sage);
 		color: var(--sage);
-		background: rgba(168, 191, 175, 0.14);
+		background: color-mix(in srgb, var(--sage) 14%, transparent);
 	}
 	.ctx {
 		display: flex;
@@ -220,7 +220,7 @@
 	.ctx .btn.on {
 		border-color: var(--sage);
 		color: var(--sage);
-		background: rgba(168, 191, 175, 0.14);
+		background: color-mix(in srgb, var(--sage) 14%, transparent);
 	}
 	.more {
 		width: 100%;

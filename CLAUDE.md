@@ -50,6 +50,7 @@ No TypeScript, no test framework, no auth (Tailscale is the perimeter).
 | `src/lib/Capture.svelte` | Quick capture. Title only, straight to Inbox, box clears before the request lands. |
 | `src/lib/TaskRow.svelte` | A task + the cross-off animation. |
 | `src/lib/sprites.js` | 8x8 pixel art as char grids. `src/lib/Sprite.svelte` renders them as SVG rects. |
+| `src/lib/theme.js` | Palette list + the two lines that persist the choice. The palettes themselves are CSS at the top of `app.css`. |
 | `src/app.css` | Design tokens, clockwork scrollbars, and `.panel`/`.label`/`.btn`/`.bar`/`.field.two` primitives. Page styles stay in components. |
 
 ## Conventions
@@ -62,7 +63,7 @@ No TypeScript, no test framework, no auth (Tailscale is the perimeter).
 - **Every page sets its own `<title>` via `svelte:head`.** Do not put one in `app.html` — a static
   title renders before `%sveltekit.head%` and beats every page title.
 - New game rule goes in `game.js` as a pure function.
-- Colours only from the tokens in `app.css`. Uppercase mono labels, `//` as the separator.
+- Colours only from the tokens in `app.css` — never a raw hex or `rgba()`, it breaks the light theme. Uppercase mono labels, `//` as the separator.
 - **Never add `white-space: nowrap` to a shared class** — it caused the app-wide overflow. Put
   `.nowrap` on the single element that needs it. New flex/grid containers need `min-width: 0` on
   their children or they will burst their panel.

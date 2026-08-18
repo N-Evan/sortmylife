@@ -268,7 +268,7 @@
 	.modes .btn.on {
 		border-color: var(--sage);
 		color: var(--sage);
-		background: rgba(168, 191, 175, 0.14);
+		background: color-mix(in srgb, var(--sage) 14%, transparent);
 	}
 	.heading {
 		margin: 12px 0 8px;
@@ -311,7 +311,7 @@
 		min-width: 0;
 		padding: 3px;
 		border: 1px solid var(--line-2);
-		background: rgba(30, 30, 30, 0.45);
+		background: color-mix(in srgb, var(--panel) 45%, transparent);
 		overflow: hidden;
 	}
 	.cell.out {
@@ -319,7 +319,7 @@
 	}
 	.cell.today {
 		border-color: var(--sage);
-		background: rgba(168, 191, 175, 0.08);
+		background: color-mix(in srgb, var(--sage) 8%, transparent);
 	}
 	.daynum {
 		align-self: flex-start;
@@ -444,7 +444,7 @@
 		border-right: 1px solid var(--line-2);
 	}
 	.col.today {
-		background: rgba(168, 191, 175, 0.04);
+		background: color-mix(in srgb, var(--sage) 4%, transparent);
 	}
 	.colhead {
 		position: sticky;
@@ -474,7 +474,7 @@
 		cursor: crosshair;
 	}
 	.slot:hover {
-		background: rgba(237, 235, 230, 0.04);
+		background: color-mix(in srgb, var(--bone) 4%, transparent);
 	}
 	.ev {
 		position: absolute;
@@ -527,7 +527,7 @@
 		z-index: 3;
 		height: 1px;
 		background: var(--rust);
-		box-shadow: 0 0 0 1px rgba(196, 97, 79, 0.25);
+		box-shadow: 0 0 0 1px color-mix(in srgb, var(--rust) 25%, transparent);
 	}
 
 	.gap {

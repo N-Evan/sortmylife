@@ -103,7 +103,7 @@
 		}
 	}
 	dialog::backdrop {
-		background: rgba(12, 12, 12, 0.78);
+		background: color-mix(in srgb, var(--ink) 78%, transparent);
 	}
 	.picker {
 		display: flex;
@@ -115,12 +115,12 @@
 		height: 42px;
 		padding: 7px;
 		border: 1px solid var(--line);
-		background: rgba(0, 0, 0, 0.25);
+		background: var(--sink);
 		cursor: pointer;
 	}
 	.cell.on {
 		border-color: var(--bone);
-		background: rgba(237, 235, 230, 0.1);
+		background: color-mix(in srgb, var(--bone) 10%, transparent);
 	}
 	.swatch {
 		padding: 0;

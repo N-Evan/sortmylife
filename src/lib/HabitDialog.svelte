@@ -143,7 +143,7 @@
 		}
 	}
 	dialog::backdrop {
-		background: rgba(12, 12, 12, 0.78);
+		background: color-mix(in srgb, var(--ink) 78%, transparent);
 	}
 	.three {
 		display: grid;
@@ -167,7 +167,7 @@
 	.btn.on {
 		border-color: var(--sage);
 		color: var(--sage);
-		background: rgba(168, 191, 175, 0.14);
+		background: color-mix(in srgb, var(--sage) 14%, transparent);
 	}
 	/* columns + responsive collapse come from .field.two in app.css */
 	.two .label {
@@ -184,12 +184,12 @@
 		height: 40px;
 		padding: 7px;
 		border: 1px solid var(--line);
-		background: rgba(0, 0, 0, 0.25);
+		background: var(--sink);
 		cursor: pointer;
 	}
 	.cell.on {
 		border-color: var(--bone);
-		background: rgba(237, 235, 230, 0.1);
+		background: color-mix(in srgb, var(--bone) 10%, transparent);
 	}
 	.swatch {
 		padding: 0;

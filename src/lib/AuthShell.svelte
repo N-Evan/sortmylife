@@ -55,7 +55,7 @@
 		border-left: 2px solid var(--rust);
 		padding: 8px 10px;
 		margin: 0 0 12px;
-		background: rgba(196, 97, 79, 0.1);
+		background: color-mix(in srgb, var(--rust) 10%, transparent);
 		color: var(--rust);
 		text-transform: none;
 		letter-spacing: 0.04em;

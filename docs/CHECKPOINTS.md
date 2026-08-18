@@ -135,3 +135,16 @@ Telegram credentials live in the `settings` table so they can be pasted in the U
 - The old seed lists `Today` and `Life` still exist alongside the new areas — rename or delete in-app.
 - PNG icons — manifest is SVG-only. Add if Android refuses the install prompt.
 - Streak shields / grace days. Miss a day and it resets to 0.
+
+- 2026-08-19 — **Themes + declutter.** Five palettes (Clockwork / Moss / Dusk / Harbour / Parchment —
+  the last one light) picked in Settings → Appearance. A theme is one block of eight hex values at the
+  top of `app.css`; `--line/--line-2/--dim/--tint` are `color-mix`ed off `--bone`/`--sage` so a new
+  theme is hex only. Choice lives in `localStorage['sml.theme']` (per device, no migration) and is
+  applied to `<html data-theme>` by the inline script in `app.html` before first paint. Every
+  hardcoded `rgba()` in the components was converted to `color-mix` on a token — new CSS must use
+  tokens or the light theme breaks. Bridge decluttered without dropping anything: the instrument deck
+  (field record / countdown / cycle / orbit / status) is now a `<details>` collapsed by default
+  (`localStorage['sml.deck']`) whose one-line summary keeps the headline + LVL/streak/quota/countdown,
+  and Inbox/Avoiding/Upcoming/Waiting moved into a "Trays" `<details>` under their counts. Always
+  visible: capture, headline line, CURRENTLY, context filter, NEXT UP, Routine, Schedule, queue.
+  Verified: build passes with no new warnings.

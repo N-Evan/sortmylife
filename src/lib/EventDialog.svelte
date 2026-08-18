@@ -133,7 +133,7 @@
 		}
 	}
 	dialog::backdrop {
-		background: rgba(12, 12, 12, 0.78);
+		background: color-mix(in srgb, var(--ink) 78%, transparent);
 	}
 	.allday {
 		margin-bottom: 12px;
