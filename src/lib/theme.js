@@ -8,6 +8,8 @@ export const THEMES = [
 	{ id: 'harbour', name: 'Harbour', note: 'Cold slate, sea glass' },
 	{ id: 'matrix', name: 'Matrix', note: 'Neon green on black' },
 	{ id: 'neon', name: 'Neon', note: 'Cyan / purple terminal' },
+	{ id: 'orchid', name: 'Orchid', note: 'Plum and hot pink' },
+	{ id: 'emerald', name: 'Emerald', note: 'Mint on black green' },
 	{ id: 'parchment', name: 'Parchment', note: 'Light — paper and ink' }
 ];
 

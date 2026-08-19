@@ -81,6 +81,34 @@
 	--glow: 0 0 8px color-mix(in srgb, var(--sage) 28%, transparent);
 	color-scheme: dark;
 }
+[data-theme='orchid'] {
+	/* ORCHID — deep plum glass, hot pink cursor, mauve text. */
+	--ink: #2a1526;
+	--ink-2: #331c2e;
+	--panel: #2e182a;
+	--sink: #1d0e1a;
+	--bone: #e6b9d8;
+	--sage: #ff2d92;
+	--rust: #ff7a6b;
+	--amber: #c58ad4;
+	--mono: 'Cascadia Mono', 'SF Mono', Consolas, ui-monospace, monospace;
+	--glow: 0 0 8px color-mix(in srgb, var(--sage) 30%, transparent);
+	color-scheme: dark;
+}
+[data-theme='emerald'] {
+	/* EMERALD — near-black green terminal, mint text, violet accent. */
+	--ink: #0a1410;
+	--ink-2: #0f1d17;
+	--panel: #0c1913;
+	--sink: #050c09;
+	--bone: #9de8b4;
+	--sage: #3ddc6b;
+	--rust: #ff6b6b;
+	--amber: #a78bfa;
+	--mono: 'Cascadia Mono', 'SF Mono', Consolas, ui-monospace, monospace;
+	--glow: 0 0 8px color-mix(in srgb, var(--sage) 26%, transparent);
+	color-scheme: dark;
+}
 [data-theme='harbour'] {
 	/* HARBOUR — cold slate and sea glass. */
 	--ink: #1a1f24;

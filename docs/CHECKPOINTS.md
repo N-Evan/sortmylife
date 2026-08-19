@@ -163,3 +163,7 @@ Telegram credentials live in the `settings` table so they can be pasted in the U
   Neon (cyan/purple, console face) — a theme may now override `--mono` and `--glow` too.
   Verified: headless-Chrome screenshots at 390 / 1000 / 1440 in Clockwork, Matrix, Neon and
   Parchment; no horizontal overflow at 390.
+
+- Two more palettes from reference screenshots: Orchid (deep plum / hot pink / mauve) and
+  Emerald (near-black green / mint / violet accent). Pure CSS blocks in `app.css` plus two
+  lines in `theme.js`; both set `--mono` and `--glow` like Matrix/Neon. Build clean.
