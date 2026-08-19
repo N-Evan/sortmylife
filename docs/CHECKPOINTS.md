@@ -148,3 +148,18 @@ Telegram credentials live in the `settings` table so they can be pasted in the U
   and Inbox/Avoiding/Upcoming/Waiting moved into a "Trays" `<details>` under their counts. Always
   visible: capture, headline line, CURRENTLY, context filter, NEXT UP, Routine, Schedule, queue.
   Verified: build passes with no new warnings.
+
+- 2026-08-19 — **Bridge layout pass + 2 more themes.** Fixed: the head comment in `app.html`
+  contained a literal `%sveltekit.head%`, so SvelteKit substituted the real head *inside the comment*
+  and the tail leaked as visible text on every page — never put a `%sveltekit.*%` token in a comment.
+  Bridge is now a two-zone grid: main column (capture, deck, context filter, NEXT UP, queue) and a
+  side rail (routine, schedule, trays) that only splits at ≥900px, single column and in reading order
+  below that. Deck and trays both default open where the rail exists, collapsed on a phone, each
+  remembered in localStorage. The orbit lost its duplicate headline (it lives in the deck summary
+  line), shrank, and now sits beside the status panel. `.zone > *` gets `min-width: 0` — grid children
+  default to `min-width: auto` and burst the page. `.label` uses `overflow-wrap: break-word` so
+  captions stop splitting mid-word ("SCO / RE") when a column tightens; the hudtop only goes 3-up at
+  1180px now that it lives in a column. New themes: Matrix (neon green, Courier, phosphor glow) and
+  Neon (cyan/purple, console face) — a theme may now override `--mono` and `--glow` too.
+  Verified: headless-Chrome screenshots at 390 / 1000 / 1440 in Clockwork, Matrix, Neon and
+  Parchment; no horizontal overflow at 390.

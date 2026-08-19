@@ -6,6 +6,8 @@ export const THEMES = [
 	{ id: 'moss', name: 'Moss', note: 'Warm forest dark' },
 	{ id: 'dusk', name: 'Dusk', note: 'Indigo, no reds' },
 	{ id: 'harbour', name: 'Harbour', note: 'Cold slate, sea glass' },
+	{ id: 'matrix', name: 'Matrix', note: 'Neon green on black' },
+	{ id: 'neon', name: 'Neon', note: 'Cyan / purple terminal' },
 	{ id: 'parchment', name: 'Parchment', note: 'Light — paper and ink' }
 ];
 

@@ -20,8 +20,14 @@
 	// The instrument deck (record / countdown / orbit / status) is glanceable but noisy.
 	// Collapsed by default: the one line left behind carries the headline and the numbers.
 	let deck = $state(false);
-	$effect(() => (deck = localStorage.getItem('sml.deck') === '1'));
-	const toggleDeck = (e) => localStorage.setItem('sml.deck', e.currentTarget.open ? '1' : '0');
+	let trays = $state(false);
+	// Both open by default where there is room for them, collapsed on a phone.
+	const remembered = (k) => (localStorage.getItem(k) ?? (innerWidth >= 900 ? '1' : '0')) === '1';
+	$effect(() => {
+		deck = remembered('sml.deck');
+		trays = remembered('sml.trays');
+	});
+	const remember = (k) => (e) => localStorage.setItem(k, e.currentTarget.open ? '1' : '0');
 	let ctx = $state('');
 
 	$effect(() => {
@@ -131,9 +137,12 @@
 
 <svelte:head><title>{tabLabel} — SortMyLife</title></svelte:head>
 
+<div class="bridge">
+<div class="zone top">
+
 <Capture />
 
-<details class="deck" bind:open={deck} ontoggle={toggleDeck}>
+<details class="deck" bind:open={deck} ontoggle={remember('sml.deck')}>
 	<summary class="panel deckline">
 		<span class="hl label" class:rust={headline.hot}>{headline.text}</span>
 		<span class="label dim nums">
@@ -188,6 +197,7 @@
 	</section>
 </div>
 
+<div class="deckrow">
 <div class="stage">
 	<div class="ring r1"></div>
 	<div class="ring r2"></div>
@@ -206,7 +216,6 @@
 		{/each}
 	</div>
 	<div class="core"><Sprite name="core" color="var(--bone)" light="var(--sage)" /></div>
-	<p class="headline" class:rust={headline.hot}>{headline.text}</p>
 </div>
 
 <section class="panel status">
@@ -225,6 +234,7 @@
 		{/each}
 	</div>
 </section>
+</div>
 </details>
 
 <!-- CURRENTLY -->
@@ -285,6 +295,10 @@
 	{/if}
 </section>
 
+</div>
+
+<aside class="zone side">
+
 <!-- STRIPS -->
 <div class="strips">
 	{#if todayHabits.length}
@@ -324,12 +338,12 @@
 </div>
 
 <!-- TRAYS: everything that is a count first and a list second -->
-<details class="trays">
+<details class="trays" bind:open={trays} ontoggle={remember('sml.trays')}>
 	<summary class="panel trayline">
 		<span class="label grow">
 			Trays // inbox {inbox.length} // avoiding {avoided.length} // upcoming {upcoming.length} // waiting {waiting.length}
 		</span>
-		<span class="label dim">▼</span>
+		<span class="label dim">{trays ? '▲' : '▼'}</span>
 	</summary>
 	<div class="strips">
 		<a class="panel strip" href={inboxList ? `/lists/${inboxList.id}` : '/lists'} class:mute={!inbox.length}>
@@ -379,6 +393,10 @@
 	</div>
 </details>
 
+</aside>
+
+<div class="zone queue">
+
 <div class="rule">
 	<button class="label toggle" onclick={() => (showAll = !showAll)}>
 		Priority queue ({ranked.length}) {showAll ? '▲' : '▼'}
@@ -400,6 +418,9 @@
 	<p class="label dim empty">QUEUE EMPTY // NOTHING PENDING</p>
 {/if}
 
+</div>
+</div>
+
 {#if editing}
 	<TaskDialog lists={data.lists} task={editing} onclose={() => (editing = null)} />
 {/if}
@@ -411,7 +432,7 @@
 		grid-template-areas: 'readout readout' 'record cycle';
 		gap: 8px;
 	}
-	@media (min-width: 720px) {
+	@media (min-width: 1180px) {
 		.hudtop {
 			grid-template-columns: 1fr 1.4fr 1fr;
 			grid-template-areas: 'record readout cycle';
@@ -423,7 +444,7 @@
 
 	dl { margin: 8px 0; display: grid; gap: 3px; }
 	dl > div { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-	dd { margin: 0; font-size: 13px; letter-spacing: 0.08em; }
+	dd { margin: 0; font-size: 13px; letter-spacing: 0.08em; overflow-wrap: normal; }
 
 	.xpbar { height: 5px; border: 1px solid var(--line); margin-bottom: 5px; }
 	.xpbar span {
@@ -451,7 +472,9 @@
 	.qbtns { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
 	.qbtns .btn { min-height: 26px; width: 26px; padding: 0; font-size: 13px; }
 
-	.stage { position: relative; width: min(100%, 420px); aspect-ratio: 1; margin: 6px auto 0; }
+	.deckrow { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+	.stage { position: relative; flex: 0 0 auto; width: min(46%, 190px); aspect-ratio: 1; }
+	.deckrow .status { flex: 1 1 220px; }
 	.ring {
 		position: absolute; top: 50%; left: 50%; translate: -50% -50%;
 		border-radius: 50%; border: 1px dashed var(--line);
@@ -467,22 +490,14 @@
 	@keyframes pulse { 50% { opacity: 0.35; } }
 
 	.core { position: absolute; top: 50%; left: 50%; width: 44px; height: 44px; translate: -50% -50%; }
-	.headline {
-		position: absolute; top: 50%; left: 0; right: 0; translate: 0 -190%;
-		margin: 0; padding: 0 8px; text-align: center; text-wrap: balance;
-		font-size: clamp(15px, 5.2vw, 30px); line-height: 1.15;
-		letter-spacing: 0.06em; text-transform: uppercase;
-		background: linear-gradient(var(--ink), var(--ink)) center / 100% 62% no-repeat;
-	}
 
-	.status { margin-top: 6px; display: grid; gap: 7px; justify-items: center; text-align: center; }
+	.status { display: grid; gap: 7px; justify-items: center; text-align: center; }
 	.statline { font-size: 11px; letter-spacing: 0.18em; color: var(--bone); }
 	.status .bar { width: min(100%, 460px); }
 
 	.currently {
 		display: grid;
 		gap: 5px;
-		margin-top: 10px;
 		border-left: 2px solid var(--sage);
 	}
 	.cur-title { font-size: 14px; }
@@ -498,7 +513,6 @@
 		flex-wrap: wrap;
 		align-items: center;
 		gap: 5px;
-		margin-top: 10px;
 	}
 	.ctxchip {
 		padding: 5px 9px;
@@ -521,7 +535,7 @@
 	.habits { gap: 8px; }
 	.hrings { display: flex; flex-wrap: wrap; gap: 8px; }
 
-	.hero { margin-top: 10px; border-left: 2px solid var(--sage); }
+	.hero { border-left: 2px solid var(--sage); }
 	.hero.hot { border-left-color: var(--rust); }
 	.pick {
 		margin: 6px 0 9px;
@@ -549,7 +563,24 @@
 	.alsoitem::before { content: '→ '; color: var(--dim); }
 	.none { margin: 8px 0; color: var(--dim); font-size: 13px; }
 
-	.deck { margin-bottom: 8px; }
+	/* Phone: one column, in reading order. Desktop: the counts and the routine move into a
+	   side rail so the hero and the queue stop being a single 1080px-wide stack. */
+	.bridge { display: grid; gap: 12px; }
+	.zone { display: grid; gap: 10px; align-content: start; min-width: 0; }
+	.zone > * { min-width: 0; }
+	@media (min-width: 900px) {
+		.bridge {
+			grid-template-columns: minmax(0, 1.75fr) minmax(280px, 1fr);
+			grid-template-areas: 'top side' 'queue side';
+			align-items: start;
+			gap: 14px;
+		}
+		.top { grid-area: top; }
+		.side { grid-area: side; }
+		.queue { grid-area: queue; }
+	}
+
+	.deck { margin-bottom: 0; }
 	summary {
 		display: flex;
 		align-items: center;
@@ -563,15 +594,14 @@
 	.nums { text-align: right; }
 	@media (max-width: 560px) { .nums { display: none; } }
 	.caret { flex: none; }
-	.trays { margin-top: 8px; }
+	.trays { margin-top: 0; }
 	.trays[open] .trayline { margin-bottom: 8px; }
 	.trays .strips { margin-top: 0; }
 
 	.strips {
 		display: grid;
-		grid-template-columns: 1fr 1fr;
+		grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
 		gap: 8px;
-		margin-top: 10px;
 	}
 	.strip { display: grid; gap: 4px; align-content: start; }
 	.strip.wide { grid-column: 1 / -1; }

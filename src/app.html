@@ -11,8 +11,10 @@
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 		<link rel="manifest" href="%sveltekit.assets%/manifest.json" />
 		<link rel="icon" href="%sveltekit.assets%/icon.svg" />
-		<!-- No <title> here on purpose: a static one renders before %sveltekit.head% and wins,
-		     which is what made every tab show the bare host. Pages set their own. -->
+		<!-- No title tag here on purpose: a static one renders before the SvelteKit head
+		     placeholder below and wins, which made every tab show the bare host. Pages set
+		     their own. Never put a percent-sveltekit placeholder inside a comment: it gets
+		     substituted in place and the comment leaks onto the page. -->
 		<script>try{var t=localStorage.getItem('sml.theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 		%sveltekit.head%
 	</head>

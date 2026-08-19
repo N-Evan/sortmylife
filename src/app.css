@@ -13,6 +13,8 @@
 	--sage: #a8bfaf;
 	--rust: #c4614f;
 	--amber: #d9a85c;
+	--mono: ui-monospace, 'Cascadia Mono', 'SF Mono', Consolas, 'Liberation Mono', monospace;
+	--glow: none;
 	color-scheme: dark;
 }
 [data-theme='moss'] {
@@ -51,6 +53,34 @@
 	--amber: #8a6417;
 	color-scheme: light;
 }
+[data-theme='matrix'] {
+	/* MATRIX — black glass and neon green, Courier, phosphor glow. */
+	--ink: #030803;
+	--ink-2: #071107;
+	--panel: #061006;
+	--sink: #010401;
+	--bone: #b7ffc4;
+	--sage: #22ff5f;
+	--rust: #ff4d4d;
+	--amber: #b8ff33;
+	--mono: 'Courier New', 'Nimbus Mono PS', Courier, monospace;
+	--glow: 0 0 7px color-mix(in srgb, var(--sage) 40%, transparent);
+	color-scheme: dark;
+}
+[data-theme='neon'] {
+	/* NEON — cyan and purple terminal. Wide console face, faint bloom. */
+	--ink: #0c0a18;
+	--ink-2: #141029;
+	--panel: #110d22;
+	--sink: #070514;
+	--bone: #d7e8f7;
+	--sage: #2fe0e6;
+	--rust: #ff5c8a;
+	--amber: #b47cff;
+	--mono: 'Cascadia Code', 'Lucida Console', 'DejaVu Sans Mono', monospace;
+	--glow: 0 0 8px color-mix(in srgb, var(--sage) 28%, transparent);
+	color-scheme: dark;
+}
 [data-theme='harbour'] {
 	/* HARBOUR — cold slate and sea glass. */
 	--ink: #1a1f24;
@@ -69,7 +99,6 @@
 	--line-2: color-mix(in srgb, var(--bone) 9%, transparent);
 	--dim: color-mix(in srgb, var(--bone) 52%, transparent);
 	--tint: color-mix(in srgb, var(--sage) 13%, transparent);
-	--mono: ui-monospace, 'Cascadia Mono', 'SF Mono', Consolas, 'Liberation Mono', monospace;
 	--nav-h: 62px;
 }
 
@@ -139,6 +168,7 @@ body {
 	overscroll-behavior-y: none;
 	/* A long unbroken string (a URL in a task title) must never widen the page. */
 	overflow-wrap: anywhere;
+	text-shadow: var(--glow);
 }
 
 body {
@@ -183,9 +213,17 @@ textarea {
 /* ---- shell ---- */
 
 .shell {
-	max-width: 1080px;
+	max-width: 1240px;
 	margin: 0 auto;
 	padding: 14px 14px calc(var(--nav-h) + env(safe-area-inset-bottom) + 22px);
+}
+@media (max-width: 520px) {
+	.shell {
+		padding: 10px 10px calc(var(--nav-h) + env(safe-area-inset-bottom) + 20px);
+	}
+	.panel {
+		padding: 10px 11px;
+	}
 }
 
 /* ---- primitives ---- */
@@ -193,6 +231,9 @@ textarea {
 /* No `white-space: nowrap` here. It was the single cause of most overflow on this app:
    every long label pushed its container sideways instead of wrapping. Opt in with .nowrap. */
 .label {
+	/* body sets overflow-wrap:anywhere for long URLs; a caption must not be sliced
+	   mid-word ("SCO / RE") when its column gets tight. */
+	overflow-wrap: break-word;
 	font-size: 10px;
 	letter-spacing: 0.18em;
 	text-transform: uppercase;
@@ -238,7 +279,7 @@ textarea {
 	display: flex;
 	align-items: center;
 	gap: 12px;
-	margin: 18px 0 12px;
+	margin: 4px 0 2px;
 }
 .rule::before,
 .rule::after {
