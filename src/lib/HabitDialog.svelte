@@ -1,6 +1,6 @@
 <script>
 	import Sprite from './Sprite.svelte';
-	import { call } from './api.js';
+	import { call, openModal } from './api.js';
 	import { ICON_NAMES, LIST_COLORS } from './sprites.js';
 	import { SLOTS, ALL_DAYS, WEEKDAY_LABELS } from './game.js';
 
@@ -19,7 +19,7 @@
 	let confirming = $state(false);
 
 	$effect(() => {
-		dlg?.showModal();
+		openModal(dlg);
 	});
 
 	const toggleDay = (i) => (days = days ^ (1 << i));
@@ -44,13 +44,13 @@
 </script>
 
 <dialog bind:this={dlg} onclose={() => onclose?.()} oncancel={() => onclose?.()}>
-	<form onsubmit={save}>
+	<!-- svelte-ignore a11y_autofocus -->
+	<form onsubmit={save} tabindex="-1" autofocus>
 		<div class="rule"><span class="label">{habit ? 'RETUNE HABIT' : 'NEW HABIT'}</span></div>
 
 		<div class="field">
 			<label class="label" for="h-name">Name</label>
-			<!-- svelte-ignore a11y_autofocus -->
-			<input id="h-name" bind:value={name} maxlength="40" autofocus required />
+			<input id="h-name" bind:value={name} maxlength="40" required />
 		</div>
 
 		<div class="field">
@@ -193,11 +193,5 @@
 	}
 	.swatch {
 		padding: 0;
-	}
-	.actions {
-		display: flex;
-		gap: 8px;
-		align-items: center;
-		margin-top: 6px;
 	}
 </style>

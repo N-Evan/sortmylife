@@ -1,5 +1,5 @@
 <script>
-	import { call, toLocalInput, fromLocalInput } from './api.js';
+	import { call, openModal, toLocalInput, fromLocalInput } from './api.js';
 	import { PRIORITY, EFFORT, EFFORT_STEPS, CONTEXTS } from './game.js';
 	import { goto } from '$app/navigation';
 
@@ -19,7 +19,7 @@
 	let err = $state('');
 
 	$effect(() => {
-		dlg?.showModal();
+		openModal(dlg);
 	});
 
 	async function save(e) {
@@ -60,13 +60,13 @@
 </script>
 
 <dialog bind:this={dlg} onclose={() => onclose?.()} oncancel={() => onclose?.()}>
-	<form onsubmit={save}>
+	<!-- svelte-ignore a11y_autofocus -->
+	<form onsubmit={save} tabindex="-1" autofocus>
 		<div class="rule"><span class="label">{task ? 'AMEND RECORD' : 'NEW DIRECTIVE'}</span></div>
 
 		<div class="field">
 			<label class="label" for="t-title">Title</label>
-			<!-- svelte-ignore a11y_autofocus -->
-			<input id="t-title" bind:value={title} maxlength="200" autofocus required />
+			<input id="t-title" bind:value={title} maxlength="200" required />
 		</div>
 
 		<div class="field">
@@ -238,11 +238,5 @@
 		min-height: 32px;
 		font-size: 9px;
 		padding: 0 10px;
-	}
-	.actions {
-		display: flex;
-		gap: 8px;
-		align-items: center;
-		margin-top: 6px;
 	}
 </style>

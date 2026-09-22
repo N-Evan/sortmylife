@@ -1,6 +1,6 @@
 <script>
 	import Sprite from './Sprite.svelte';
-	import { call } from './api.js';
+	import { call, openModal } from './api.js';
 	import { ICON_NAMES, LIST_COLORS } from './sprites.js';
 	import { goto } from '$app/navigation';
 
@@ -14,7 +14,7 @@
 	let confirming = $state(false);
 
 	$effect(() => {
-		dlg?.showModal();
+		openModal(dlg);
 	});
 
 	async function save(e) {
@@ -37,13 +37,13 @@
 </script>
 
 <dialog bind:this={dlg} onclose={() => onclose?.()} oncancel={() => onclose?.()}>
-	<form onsubmit={save}>
+	<!-- svelte-ignore a11y_autofocus -->
+	<form onsubmit={save} tabindex="-1" autofocus>
 		<div class="rule"><span class="label">{list ? 'RECALIBRATE LIST' : 'NEW LIST'}</span></div>
 
 		<div class="field">
 			<label class="label" for="l-name">Name</label>
-			<!-- svelte-ignore a11y_autofocus -->
-			<input id="l-name" bind:value={name} maxlength="40" autofocus required />
+			<input id="l-name" bind:value={name} maxlength="40" required />
 		</div>
 
 		<div class="field">
@@ -124,11 +124,5 @@
 	}
 	.swatch {
 		padding: 0;
-	}
-	.actions {
-		display: flex;
-		gap: 8px;
-		align-items: center;
-		margin-top: 6px;
 	}
 </style>

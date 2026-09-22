@@ -167,3 +167,38 @@ Telegram credentials live in the `settings` table so they can be pasted in the U
 - Two more palettes from reference screenshots: Orchid (deep plum / hot pink / mauve) and
   Emerald (near-black green / mint / violet accent). Pure CSS blocks in `app.css` plus two
   lines in `theme.js`; both set `--mono` and `--glow` like Matrix/Neon. Build clean.
+
+- 2026-08-20 — **Bridge rebuilt as NOW / TODAY / REST.** The two previous passes only *collapsed*
+  panels; the page still had ten siblings of equal weight and no reading order. Now one column
+  capped at 760px: capture → **NOW** (the alarm line + either the live focus session or the single
+  top pick with FOCUS/SKIP/DETAILS, plus the context chips that feed the pick) → **TODAY** (one
+  chronological agenda merging overdue "LATE" rows, today's events and tasks due today, then the
+  habit rings, then one footer line carrying quota dots + ± , LVL, streak, XP and the next-deadline
+  countdown) → **REST** (a chip row of counts: inbox / queue / avoiding / waiting / areas; inbox and
+  areas are links, the other three take turns in **one** shared drawer of `TaskRow`s, so the landing
+  page never shows two lists at once). Deleted from the Bridge: field-record, next-deadline, cycle-dial
+  and status panels, the deck and trays `<details>` and their localStorage flags, the separate
+  routine/schedule strips, the upcoming tray (the calendar answers "beyond today" now) and the
+  standalone queue zone. The **orbit moved to `/lists`** above the area grid — same markup and CSS,
+  reached from the `AREAS` chip. **Calendar now defaults to month** (`'day'` → `'month'` in
+  `calendar/+page.server.js`); `?v=` still overrides and month-day clicks still drop into day view.
+  Verified: build clean, no new warnings.
+
+- 2026-08-20 — **Mobile fixes + NEXT / RECORD / commit-to-today** (schema v7). Four root causes, not
+  four patches: (1) touch browsers force-zoom any focused field under 16px → `@media (pointer: coarse)`
+  sets inputs to 16px in `app.css`; (2) the keyboard popped because every dialog had `autofocus` on its
+  first text field → `openModal()` in `api.js` is now the one entry point, the `<form>` is the dialog's
+  focus delegate (`tabindex="-1" autofocus`) and the field is only focused when `(pointer: fine)`;
+  (3) dialog buttons wrapped their own labels because `.actions` was a non-wrapping flex row of four
+  buttons — one shared `.actions` in `app.css` with `flex-wrap` (the four identical component copies
+  are gone), so a phone gets `[DELETE FOCUS] / [CANCEL SAVE]`; (4) the Bridge footer overflowed because
+  three `.nowrap` labels shared one flex row — `nowrap` cannot shrink. Quota segments became one
+  continuous fill bar; a segment per task was 2px of fill between two 1px borders past a quota of ~8.
+  Added: **NEXT** tier (tomorrow + 7-day counts and the three nearest deadlines — the only part of the
+  page that looks past midnight), **RECORD** tier (XP bar, level, quota bar + ±, streak, longest — the
+  payoff back at a readable size), and **commit to today**: `tasks.planned_day` holds a local day key,
+  so the promise expires by itself at midnight. The ★ on any `TaskRow` toggles it via `planToday`
+  (server stamps the day, never the client), `scoreTask` gives it +45 so NOW respects what you promised,
+  and committed tasks sit under the LATE rows in TODAY as `YOURS`.
+  Verified: build clean; live DB copy migrated v6→v7 with `planned_day` present and all rows intact;
+  server boots on the migrated copy and serves.

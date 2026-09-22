@@ -1,5 +1,5 @@
 <script>
-	import { call, toLocalInput, fromLocalInput } from './api.js';
+	import { call, openModal, toLocalInput, fromLocalInput } from './api.js';
 	import { LIST_COLORS } from './sprites.js';
 
 	let { event = null, at = null, onclose } = $props();
@@ -18,7 +18,7 @@
 	let err = $state('');
 
 	$effect(() => {
-		dlg?.showModal();
+		openModal(dlg);
 	});
 
 	// Keep the end after the start without fighting the user mid-edit.
@@ -57,13 +57,13 @@
 </script>
 
 <dialog bind:this={dlg} onclose={() => onclose?.()} oncancel={() => onclose?.()}>
-	<form onsubmit={save}>
+	<!-- svelte-ignore a11y_autofocus -->
+	<form onsubmit={save} tabindex="-1" autofocus>
 		<div class="rule"><span class="label">{event ? 'AMEND EVENT' : 'NEW EVENT'}</span></div>
 
 		<div class="field">
 			<label class="label" for="e-title">Title</label>
-			<!-- svelte-ignore a11y_autofocus -->
-			<input id="e-title" bind:value={title} maxlength="120" autofocus required />
+			<input id="e-title" bind:value={title} maxlength="120" required />
 		</div>
 
 		<label class="allday row">
@@ -166,11 +166,5 @@
 	.swatch.on {
 		border-color: var(--bone);
 		outline: 1px solid var(--bone);
-	}
-	.actions {
-		display: flex;
-		gap: 8px;
-		align-items: center;
-		margin-top: 6px;
 	}
 </style>

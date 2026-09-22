@@ -2,7 +2,7 @@
 	import Sprite from './Sprite.svelte';
 	import { call } from './api.js';
 	import { flash, celebrate } from './hud.svelte.js';
-	import { PRIORITY, levelFor, taskXp, EFFORT, staleDays, STALE_DAYS } from './game.js';
+	import { PRIORITY, levelFor, taskXp, EFFORT, staleDays, STALE_DAYS, dayKey } from './game.js';
 
 	let { task, showList = false, onedit = null } = $props();
 
@@ -14,6 +14,17 @@
 	const overdue = $derived(!done && task.due_at && task.due_at < Date.now());
 	const reward = $derived(done ? task.xp : taskXp(task.priority, task.due_at));
 	const stale = $derived(done ? 0 : staleDays(task));
+	const planned = $derived(!done && task.planned_day === dayKey());
+
+	async function plan() {
+		if (busy) return;
+		busy = true;
+		try {
+			await call('planToday', { id: task.id, on: !planned });
+		} finally {
+			busy = false;
+		}
+	}
 
 	function dueLabel(ms) {
 		if (!ms) return null;
@@ -98,6 +109,14 @@
 			{/if}
 		</span>
 	</button>
+
+	{#if !done}
+		<button
+			class="pin" class:on={planned} onclick={plan} disabled={busy}
+			title={planned ? 'Committed to today — click to take it back' : 'Commit to today'}
+			aria-label={planned ? 'Take off today' : 'Commit to today'}
+		>★</button>
+	{/if}
 
 	<span class="xp label">{done ? `+${task.xp}` : `${reward}xp`}</span>
 	<span class="strike"></span>
@@ -219,6 +238,25 @@
 		color: var(--sage);
 		opacity: 0.7;
 		font-size: 10px;
+	}
+
+	/* Commit to today. Lit means you promised. */
+	.pin {
+		flex: none;
+		width: 26px;
+		min-height: 26px;
+		border: 1px solid var(--line);
+		background: none;
+		color: var(--line);
+		font-size: 12px;
+		line-height: 1;
+		cursor: pointer;
+	}
+	.pin:hover { border-color: var(--sage); color: var(--sage); }
+	.pin.on {
+		border-color: var(--sage);
+		color: var(--sage);
+		background: color-mix(in srgb, var(--sage) 16%, transparent);
 	}
 
 	/* the cross-off line, drawn left to right */

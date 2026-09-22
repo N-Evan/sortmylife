@@ -243,6 +243,8 @@ const OPS = {
 	complete: (b, u) => db.completeTask(u, id(b.id)),
 	uncomplete: (b, u) => db.uncompleteTask(u, id(b.id)),
 	setQuota: (b, u) => db.setQuota(u, int(b.quota, 1, 20)),
+	/** Commit a task to today (or take it back). The day itself is the server's, not the body's. */
+	planToday: (b, u) => db.planTask(u, id(b.id), !!b.on),
 
 	/** Quick capture. Title only — sorting it out is a separate, later decision. */
 	capture: (b, u) => {

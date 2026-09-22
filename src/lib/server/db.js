@@ -201,7 +201,11 @@ const MIGRATIONS = [
 	`INSERT OR REPLACE INTO settings (user_id, key, value)
 		SELECT 0, 'tg_token', value FROM settings
 		WHERE user_id != 0 AND key = 'tg_token' AND value != '' LIMIT 1;
-	DELETE FROM settings WHERE user_id != 0 AND key IN ('tg_token', 'tg_offset');`
+	DELETE FROM settings WHERE user_id != 0 AND key IN ('tg_token', 'tg_offset');`,
+
+	// "I am doing this today" — a local day key, so the commitment expires on its own at midnight
+	// and there is nothing to clean up.
+	`ALTER TABLE tasks ADD COLUMN planned_day TEXT NOT NULL DEFAULT '';`
 ];
 
 const version = () => db.prepare('PRAGMA user_version').get().user_version;
@@ -629,6 +633,13 @@ export const openTasks = (u, limit = 200) =>
 		 LIMIT ?`,
 		u, limit
 	);
+
+/** Commit a task to today, or take it back. The day stamp comes from the server, never the client. */
+export const planTask = (u, id, on) =>
+	run(
+		'UPDATE tasks SET planned_day = ? WHERE id = ? AND user_id = ?',
+		on ? dayKey() : '', id, u
+	).changes > 0;
 
 /**
  * Everything the BRIDGE needs in one round trip: every open task, plus state.

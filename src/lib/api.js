@@ -22,3 +22,16 @@ export function toLocalInput(ms) {
 }
 
 export const fromLocalInput = (v) => (v ? new Date(v).getTime() : null);
+
+/**
+ * Open a <dialog> without summoning the phone keyboard.
+ *
+ * `showModal()` focuses the dialog's focus delegate — the first element carrying `autofocus`,
+ * or the first tabbable one if none does. Every dialog therefore marks its <form> as the
+ * delegate (`tabindex="-1" autofocus`) so the text field is NOT focused, and we only move focus
+ * into the field when there is a real pointer, i.e. no on-screen keyboard to shove the layout up.
+ */
+export function openModal(dlg) {
+	dlg?.showModal();
+	if (matchMedia('(pointer: fine)').matches) dlg?.querySelector('input, textarea, select')?.focus();
+}

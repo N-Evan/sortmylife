@@ -104,6 +104,13 @@ export function scoreTask(t, now = Date.now()) {
 		why.push(`AVOIDED ${stale}D`);
 	}
 
+	// A promise you made this morning outranks anything the scoring would have picked for you,
+	// short of something already overdue. The stamp is a day key, so it expires by itself.
+	if (t.planned_day && t.planned_day === dayKey(new Date(now))) {
+		score += 45;
+		why.push('COMMITTED');
+	}
+
 	return { score, why: why.length ? why : ['NEXT IN LINE'], effort: t.effort ?? 9999 };
 }
 

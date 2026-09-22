@@ -384,6 +384,15 @@ textarea {
 	min-height: 76px;
 	resize: vertical;
 }
+/* A touch browser zooms the whole page when it focuses a field smaller than 16px, and never
+   zooms back out. 16px on coarse pointers is the only way to stop it. */
+@media (pointer: coarse) {
+	input,
+	select,
+	textarea {
+		font-size: 16px;
+	}
+}
 input:focus,
 select:focus,
 textarea:focus {
@@ -394,6 +403,23 @@ textarea:focus {
 	display: grid;
 	gap: 5px;
 	margin-bottom: 12px;
+}
+
+/* Dialog footers. Four buttons never fit one phone-width row, and a non-wrapping row makes
+   each button wrap its own label instead — so the row wraps, and the `.grow` spacer breaks it
+   after the destructive buttons: [DELETE FOCUS] / [CANCEL SAVE] on a phone, one row on desktop. */
+.actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+	margin-top: 6px;
+}
+.actions .btn {
+	flex: 1 1 auto;
+}
+.actions .grow {
+	flex: 1 0 0;
 }
 
 /* ---- bottom nav ---- */
