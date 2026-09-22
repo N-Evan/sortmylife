@@ -1,7 +1,7 @@
 import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
-import { taskXp, bankStreak, dayKey, habitStreak } from '../game.js';
+import { taskXp, bankStreak, dayKey, habitStreak, STAGE_XP, firstReach } from '../game.js';
 
 const FILE = process.env.SML_DB ?? 'data/sortmylife.db';
 mkdirSync(dirname(FILE), { recursive: true });
@@ -205,7 +205,25 @@ const MIGRATIONS = [
 
 	// "I am doing this today" — a local day key, so the commitment expires on its own at midnight
 	// and there is nothing to clean up.
-	`ALTER TABLE tasks ADD COLUMN planned_day TEXT NOT NULL DEFAULT '';`
+	`ALTER TABLE tasks ADD COLUMN planned_day TEXT NOT NULL DEFAULT '';`,
+
+	// Initiatives. The per-stage stamps are the review's dates and the "XP already paid" marker.
+	`CREATE TABLE initiatives (
+		id INTEGER PRIMARY KEY,
+		user_id INTEGER NOT NULL,
+		title TEXT NOT NULL,
+		problem TEXT NOT NULL DEFAULT '',
+		pitched_to TEXT NOT NULL DEFAULT '',
+		impact TEXT NOT NULL DEFAULT '',
+		stage TEXT NOT NULL DEFAULT 'idea',
+		xp INTEGER NOT NULL DEFAULT 0,
+		created_at INTEGER NOT NULL,
+		pitched_at INTEGER,
+		doing_at INTEGER,
+		shipped_at INTEGER,
+		impact_at INTEGER
+	);
+	CREATE INDEX initiatives_user ON initiatives(user_id);`
 ];
 
 const version = () => db.prepare('PRAGMA user_version').get().user_version;
@@ -622,6 +640,57 @@ export const updateEvent = (u, id, { title, notes, location, start_at, end_at, a
 
 export const deleteEvent = (u, id) => run('DELETE FROM events WHERE id = ? AND user_id = ?', id, u);
 
+/* ---- initiatives ---- */
+
+export const getInitiatives = (u) =>
+	many('SELECT * FROM initiatives WHERE user_id = ? ORDER BY created_at DESC', u);
+
+const getInitiative = (u, id) => one('SELECT * FROM initiatives WHERE id = ? AND user_id = ?', id, u);
+
+export function createInitiative(u, { title, problem = '', pitched_to = '' }) {
+	db.exec('BEGIN');
+	run(
+		`INSERT INTO initiatives (user_id, title, problem, pitched_to, xp, created_at) VALUES (?,?,?,?,?,?)`,
+		u, title, problem, pitched_to, STAGE_XP.idea, Date.now()
+	);
+	const row = one('SELECT * FROM initiatives WHERE id = last_insert_rowid()');
+	run('UPDATE player SET xp = xp + ? WHERE user_id = ?', STAGE_XP.idea, u);
+	db.exec('COMMIT');
+	return row;
+}
+
+export const updateInitiative = (u, id, { title, problem, pitched_to, impact }) =>
+	run(
+		'UPDATE initiatives SET title=?, problem=?, pitched_to=?, impact=? WHERE id=? AND user_id=?',
+		title, problem, pitched_to, impact, id, u
+	);
+
+/** Move to any stage. `stage` must already be validated — it is interpolated as a column name. */
+export function setInitiativeStage(u, id, stage) {
+	const i = getInitiative(u, id);
+	if (!i) return null;
+	const xp = firstReach(i, stage) ? STAGE_XP[stage] : 0;
+	db.exec('BEGIN');
+	run('UPDATE initiatives SET stage = ?, xp = xp + ? WHERE id = ? AND user_id = ?', stage, xp, id, u);
+	if (xp) {
+		run(`UPDATE initiatives SET ${stage}_at = ? WHERE id = ? AND user_id = ?`, Date.now(), id, u);
+		run('UPDATE player SET xp = xp + ? WHERE user_id = ?', xp, u);
+	}
+	db.exec('COMMIT');
+	return { xp };
+}
+
+/** Deleting takes back what it paid, so create/advance/delete can't farm XP. */
+export function deleteInitiative(u, id) {
+	const i = getInitiative(u, id);
+	if (!i) return null;
+	db.exec('BEGIN');
+	run('UPDATE player SET xp = MAX(0, xp - ?) WHERE user_id = ?', i.xp, u);
+	run('DELETE FROM initiatives WHERE id = ? AND user_id = ?', id, u);
+	db.exec('COMMIT');
+	return true;
+}
+
 /* ---- aggregates ---- */
 
 export const openTasks = (u, limit = 200) =>
@@ -666,7 +735,7 @@ export function bridge(u) {
 export function clearUserData(u) {
 	db.exec('BEGIN');
 	run('DELETE FROM habit_log WHERE habit_id IN (SELECT id FROM habits WHERE user_id = ?)', u);
-	for (const t of ['events', 'reminders', 'habits', 'tasks', 'lists'])
+	for (const t of ['events', 'reminders', 'habits', 'tasks', 'lists', 'initiatives'])
 		run(`DELETE FROM ${t} WHERE user_id = ?`, u);
 	run('DELETE FROM focus WHERE user_id = ?', u);
 	run('UPDATE player SET xp = 0, streak = 0, longest = 0, streak_day = NULL WHERE user_id = ?', u);

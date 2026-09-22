@@ -1,5 +1,5 @@
 import {
-	setting, setSetting, globalSetting, setGlobalSetting, capture, userByChatId
+	setting, setSetting, globalSetting, setGlobalSetting, capture, userByChatId, createInitiative
 } from './db.js';
 
 /** One bot serves the whole server. Env var wins over the value stored by the admin. */
@@ -68,7 +68,7 @@ export async function diagnose() {
 export const dropWebhook = () => api('deleteWebhook', { drop_pending_updates: false });
 
 const HELP = (chat) =>
-	`SortMyLife\n\nYour chat ID is: ${chat}\n\nPaste that into SortMyLife → Settings → Telegram to link this chat to your account. After that, anything you send me lands in your Inbox.`;
+	`SortMyLife\n\nYour chat ID is: ${chat}\n\nPaste that into SortMyLife → Settings → Telegram to link this chat to your account. After that, anything you send me lands in your Inbox, and "/idea …" becomes an initiative.`;
 
 /**
  * One poll loop for the whole bot. A message is routed to whichever account has claimed that
@@ -97,6 +97,15 @@ export async function poll() {
 		}
 
 		if (!text) continue;
+
+		const idea = /^\/idea(?:@\w+)?\b\s*(.*)$/s.exec(text);
+		if (idea) {
+			const title = idea[1].trim().slice(0, 200);
+			if (title) createInitiative(user.id, { title });
+			await sendToChat(chat, title ? `→ Idea: ${title}` : 'Usage: /idea fix the flaky deploy');
+			continue;
+		}
+
 		const task = capture(user.id, text);
 		await sendToChat(chat, task ? `→ Inbox: ${text}` : 'Could not capture that — no Inbox list found.');
 	}

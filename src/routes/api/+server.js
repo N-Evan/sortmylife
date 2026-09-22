@@ -2,7 +2,7 @@ import { json, error } from '@sveltejs/kit';
 import * as db from '$lib/server/db.js';
 import * as auth from '$lib/server/auth.js';
 import { ICON_NAMES, LIST_COLORS } from '$lib/sprites.js';
-import { EFFORT_STEPS, CONTEXTS, SLOTS, ALL_DAYS } from '$lib/game.js';
+import { EFFORT_STEPS, CONTEXTS, SLOTS, ALL_DAYS, STAGES } from '$lib/game.js';
 import * as tg from '$lib/server/telegram.js';
 import { fireReminders } from '$lib/server/scheduler.js';
 
@@ -314,6 +314,33 @@ const OPS = {
 		}),
 
 	deleteEvent: (b, u) => db.deleteEvent(u, id(b.id)),
+
+	/* ---- initiatives ---- */
+
+	initiativeCreate: (b, u) =>
+		db.createInitiative(u, {
+			title: str(b.title, 200, 'title'),
+			problem: text(b.problem, 2000),
+			pitched_to: text(b.pitched_to, 120)
+		}),
+
+	initiativeEdit: (b, u) =>
+		db.updateInitiative(u, id(b.id), {
+			title: str(b.title, 200, 'title'),
+			problem: text(b.problem, 2000),
+			pitched_to: text(b.pitched_to, 120),
+			impact: text(b.impact, 2000)
+		}),
+
+	initiativeStage: (b, u) => {
+		// Whitelist matters: the stage name becomes a column name in db.js.
+		if (![...STAGES, 'dropped'].includes(b.stage)) throw error(400, 'bad stage');
+		const r = db.setInitiativeStage(u, id(b.id), b.stage);
+		if (!r) throw error(404, 'no such initiative');
+		return r;
+	},
+
+	initiativeDelete: (b, u) => db.deleteInitiative(u, id(b.id)),
 
 	/* ---- reminders ---- */
 

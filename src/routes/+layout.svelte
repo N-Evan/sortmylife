@@ -71,6 +71,9 @@
 			<a class="item" href="/lists" onclick={() => (more = false)}>
 				<Sprite name="book" color="currentColor" size="18" /> Life areas
 			</a>
+			<a class="item" href="/initiatives" onclick={() => (more = false)}>
+				<Sprite name="flame" color="currentColor" size="18" /> Initiatives
+			</a>
 			<a class="item" href="/settings" onclick={() => (more = false)}>
 				<Sprite name="gear" color="currentColor" size="18" /> Settings
 			</a>

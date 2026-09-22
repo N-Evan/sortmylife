@@ -202,3 +202,13 @@ Telegram credentials live in the `settings` table so they can be pasted in the U
   and committed tasks sit under the LATE rows in TODAY as `YOURS`.
   Verified: build clean; live DB copy migrated v6→v7 with `planned_day` present and all rows intact;
   server boots on the migrated copy and serves.
+
+- 2026-09-23 — **Initiatives** (schema v8). `/initiatives` (MORE sheet): standalone cards moving
+  idea → pitched → doing → shipped → impact (+ dropped). XP per stage in `game.js` (`STAGE_XP`,
+  pitched 40 / impact 50); a stage pays once — its `<stage>_at` stamp is the receipt — and delete
+  refunds, so bouncing/deleting can't farm. Reaching IMPACT forces an impact note via the editor.
+  COPY FOR REVIEW builds plain text of everything pitched+; falls back to a textarea because
+  `navigator.clipboard` is blocked over plain-http Tailscale. Telegram `/idea …` creates an idea
+  instead of an Inbox task. Not linked to tasks, deliberately.
+  Verified: build clean; live DB copy migrated v7→v8; XP once-per-stage, refund on delete, and
+  cross-user isolation asserted in a script; `/idea` regex checked (`/idea@Bot x` ok, `/ideas` not).

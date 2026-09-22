@@ -147,6 +147,17 @@ export function taskXp(priority, dueAt, at = Date.now()) {
 	return dueAt && at < dueAt ? Math.round(base * EARLY_BONUS) : base;
 }
 
+/**
+ * Initiatives: things you started without being asked. Pitched and impact pay most — that is
+ * the part a promotion looks for. `dropped` is an exit, not a step.
+ */
+export const STAGES = ['idea', 'pitched', 'doing', 'shipped', 'impact'];
+export const STAGE_XP = { idea: 5, pitched: 40, doing: 10, shipped: 30, impact: 50, dropped: 0 };
+export const nextStage = (s) => (STAGES.includes(s) ? (STAGES[STAGES.indexOf(s) + 1] ?? null) : null);
+
+/** A stage pays only the first time it is reached; its `<stage>_at` stamp is the receipt. */
+export const firstReach = (i, stage) => STAGES.slice(1).includes(stage) && i[`${stage}_at`] == null;
+
 /** Total XP needed to sit at level n. L1=0, L2=100, L3=300, L4=600, L5=1000... */
 export const xpForLevel = (n) => 50 * n * (n - 1);
 
