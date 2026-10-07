@@ -13,6 +13,7 @@ It answers *"what should I do right now?"*, then pays you XP for doing it.
 ![node:sqlite](https://img.shields.io/badge/DB-node%3Asqlite-003b57?style=flat-square&logo=sqlite&logoColor=white)
 ![Runtime deps: 0](https://img.shields.io/badge/runtime_deps-0-a8bfaf?style=flat-square)
 ![PWA](https://img.shields.io/badge/PWA-installable-5a0fc8?style=flat-square&logo=pwa&logoColor=white)
+![License: MIT](https://img.shields.io/badge/license-MIT-d9a85c?style=flat-square)
 
 </div>
 
@@ -224,3 +225,9 @@ ID into their own settings.
 - **Timezones.** Times use the server's local time, since this is one machine with one clock.
 
 The full design log is in [`docs/CHECKPOINTS.md`](docs/CHECKPOINTS.md).
+
+---
+
+## License
+
+[MIT](LICENSE) © 2026 Md. Nurusshafi Evan
