@@ -212,3 +212,10 @@ Telegram credentials live in the `settings` table so they can be pasted in the U
   instead of an Inbox task. Not linked to tasks, deliberately.
   Verified: build clean; live DB copy migrated v7→v8; XP once-per-stage, refund on delete, and
   cross-user isolation asserted in a script; `/idea` regex checked (`/idea@Bot x` ok, `/ideas` not).
+
+- 2026-10-08 — **README + screenshots.** `README.md` (strengths, scoring table, architecture
+  mermaid, setup) and `docs/screenshots/` (desktop/mobile pages + hero/mobile/themes composites),
+  shot from a seeded demo DB via headless Chrome over CDP — seed/shot scripts were throwaway, not
+  in the repo. Fixed on the way: TODAY agenda rows clipped their right-hand tags on phones because
+  `.agenda` is a grid and its rows defaulted to `min-width: auto` → `.agenda > * { min-width: 0 }`.
+  Known, unfixed: Parchment swatch caption in Settings is near-invisible on dark themes.

@@ -449,6 +449,7 @@
 	/* TODAY */
 	.today { display: grid; gap: 10px; }
 	.agenda { display: grid; }
+	.agenda > * { min-width: 0; }
 	.ag {
 		display: flex;
 		align-items: baseline;
